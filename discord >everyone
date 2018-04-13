@@ -1,0 +1,37 @@
+const Discord = require('discord.js');
+const client = new Discord.Client();
+
+client.on('message', async message => {
+    if (message.author.id != client.user.id) return
+
+    if (message.content.startsWith(">everyone")) {
+        await message.delete()
+
+        if (!message.guild) return
+
+        var messageToType = ""
+        let guildMembers = message.guild.members
+        let availableChannels = message.guild.channels.filter(guildChannel => guildChannel.type === "text" && guildChannel.permissionsFor(message.guild.me).has(['SEND_MESSAGES', 'VIEW_CHANNEL']))
+
+        for (let guildMember of guildMembers.values()) {
+            messageToType += `<@${guildMember.id}> `
+
+            if (messageToType.length > 1900) {
+                sendAndDelete(availableChannels.random(), messageToType)
+                messageToType = ""
+            }
+        }
+
+        if (messageToType.length > 0) {
+            sendAndDelete(availableChannels.random(), messageToType)
+        }
+    }
+})
+
+async function sendAndDelete(channel, message) {
+    let newMessage = await channel.send(message)
+    await newMessage.delete()
+}
+
+
+client.login('')
